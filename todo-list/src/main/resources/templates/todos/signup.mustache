@@ -1,0 +1,99 @@
+{{>layouts/header}}
+
+<style>
+    /* 배경 영상 스타일 */
+    body {
+        background: none;
+        overflow: hidden; /* 배경 영상 때문에 스크롤이 생기지 않도록 */
+    }
+    .video-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        min-width: 100vw;
+        min-height: 100vh;
+        z-index: -1;
+        object-fit: cover;
+    }
+    /* 회원가입 컨테이너 스타일 */
+    .signup-container {
+        box-sizing: border-box;
+        width: 90%;
+        min-height: 50vh;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.85); /* 반투명 배경 */
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        color: black !important;
+    }
+</style>
+
+<!-- 배경 영상 -->
+<video class="video-bg" autoplay loop muted>
+    <source src="/videos/signup.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="signup-container">
+        <h2 class="mb-4 text-center">회원가입</h2>
+        <form id="signupForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">사용자 이름</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="사용자 이름을 입력하세요" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">이메일 주소</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="이메일을 입력하세요" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">비밀번호 확인</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="비밀번호를 다시 입력하세요" required>
+            </div>
+            <button id="signup-Button" type="button" class="btn btn-success w-100">회원가입</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    {
+        const signupBtn = document.querySelector("#signup-Button");
+        signupBtn.addEventListener("click", function(){
+            const pw = document.getElementById("password").value;
+            const cpw = document.getElementById("confirmPassword").value;
+            if(pw !== cpw){
+                alert("비밀번호 확인이 일치하지 않습니다.");
+                return;
+            }
+
+            const user = {
+                username : document.querySelector("#username").value,
+                password : document.querySelector("#password").value,
+                email : document.querySelector("#email").value
+            }
+
+
+            const url = `/api/todos/signup`;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify(user)
+            }).then(response => {
+                const msg = (response.ok) ? "회원가입에 성공했습니다." : "아이디 또는 이메일이 중복되었습니다.";
+                alert(msg);
+                window.location.href = "/todos/login";  // 회원가입 후 로그인페이지로 이동
+                // window.location.reload();
+            });
+
+        });
+    }
+</script>
+
+{{>layouts/footer}}

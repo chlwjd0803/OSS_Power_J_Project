@@ -1,22 +1,68 @@
-.status-text {
-    display: none;
+/* 작업 카드 스타일 */
+.task-item {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    /* 카드 간 간격을 위한 마진 */
+    margin: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* 고정된 최소 너비를 지정하여 일정 크기 유지 */
+    min-width: 280px;
+    /* 카드의 너비를 자동 조절하여 중앙 정렬에 도움 */
+    flex: 1 1 280px;
 }
-/* 여백을 줄여서 전체 공간을 콤팩트하게 */
-.status-sec {
-    margin: 20px;
+.task-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
 }
-/* 테이블 너비 축소 */
-.fixed-table {
-    table-layout: fixed;
-    width: 100%;
+
+/* 작업 헤더: 제목과 액션 버튼 */
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.fixed-table th, .fixed-table td {
-    padding: 0.4rem;
-    word-wrap: break-word;  /* 내용이 넘치지 않도록 줄바꿈 */
+.task-title {
+    font-size: 1.5rem;
+    margin: 0;
 }
-.task-delete-btn, .task-edit-btn{
-    margin-top: 2%;
+.task-actions button {
+    margin-left: 8px;
 }
+
+/* 작업 상세 정보: 마감일과 카테고리 */
+.task-details {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #666;
+}
+.task-details span {
+    margin-right: 12px;
+}
+
+/* 상태 버튼 그룹 (아래쪽에 배치) */
+.status-btn-group {
+    margin-top: 12px;
+    text-align: right;
+}
+
+/* fly-in 애니메이션 */
+@keyframes fly-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.fly-in {
+    animation: fly-in 0.5s ease-out;
+}
+
+/* 버튼 커스텀 스타일 */
 .btn-custom {
     border-radius: 20px !important;
     padding: 8px 16px;
@@ -27,27 +73,183 @@
 .btn-custom:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-/* 첫 번째 열(관리열): 좁게 설정 */
-.fixed-table th:nth-child(1),
-.fixed-table td:nth-child(1) {
-    width: 8% !important;  /* 관리 버튼만 들어가므로 좁게 */
-    padding: 0.2rem 0.3rem !important; /* 패딩도 최소화 */
+
+/* 상태 텍스트 (숨김, JS 업데이트용) */
+.status-text {
+    display: none;
 }
 
-/* 두 번째 열(카테고리): 조금 더 줄임 */
-.fixed-table th:nth-child(2),
-.fixed-table td:nth-child(2) {
-    width: 12% !important;
+/* task-list 컨테이너: 카드들을 중앙에 모으고 반응형 그리드 형태로 배치 */
+.task-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-/* 세 번째 열(작업): 기존의 20%에서 반 정도로 줄여 10%로 설정 */
-.fixed-table th:nth-child(3),
-.fixed-table td:nth-child(3) {
-    width: 16% !important;
+/* 작업추가 컨테이너 고정 */
+#todo-new {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px; /* 원하는 고정 너비로 설정 */
+    bottom: -80px;
+    transition: bottom 0.3s ease;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
 }
 
-/* 네 번째 열(상태변경): 그대로 유지 */
-.fixed-table th:nth-child(4),
-.fixed-table td:nth-child(4) {
-    width: 25% !important;
+#todo-new:hover {
+    bottom: 0;
+}
+
+/* 카테고리 메뉴 스타일 */
+#category-menu {
+    position: sticky;
+    top: 55px;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px) !important;
+}
+
+/* 카드 컴포넌트 스타일 (예: 카테고리 메뉴 카드) */
+.card {
+    margin: 15px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* 기본 (화면 넓은 경우) - 한 줄에 5개 */
+.task-item {
+    flex: 1 1 calc((100% - 64px) / 7); /* 5개이므로 4개의 gap (16px*4=64px) */
+    max-width: calc((100% - 64px) / 7);
+}
+
+/* 화면 너비 900px 이하일 때: 한 줄에 4개 */
+@media (max-width: 2700px) {
+    .task-item {
+        flex: 1 1 calc((100% - 48px) / 6); /* 4개, 3개의 gap */
+        max-width: calc((100% - 48px) / 6);
+    }
+}
+@media (max-width: 2400px) {
+    .task-item {
+        flex: 1 1 calc((100% - 48px) / 5); /* 4개, 3개의 gap */
+        max-width: calc((100% - 48px) / 5);
+    }
+}
+@media (max-width: 2100px) {
+    .task-item {
+        flex: 1 1 calc((100% - 48px) / 4); /* 4개, 3개의 gap */
+        max-width: calc((100% - 48px) / 4);
+    }
+}
+@media (max-width: 1800px) {
+    .task-item {
+        flex: 1 1 calc((100% - 48px) / 3); /* 4개, 3개의 gap */
+        max-width: calc((100% - 48px) / 3);
+    }
+}
+
+/* 화면 너비 600px 이하일 때: 한 줄에 2개 */
+@media (max-width: 1200px) {
+    .task-item {
+        flex: 1 1 calc((100% - 16px) / 2); /* 2개, 1개의 gap */
+        max-width: calc((100% - 16px) / 2);
+    }
+}
+
+/* 화면 너비 400px 이하일 때: 한 줄에 1개 */
+@media (max-width: 450px) {
+    .task-item {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+
+
+/* 상태 섹션의 헤더에 투명 오버레이 레이블 추가 */
+.status-sec {
+    position: relative;
+    padding-top: 50px; /* 레이블 공간 확보 */
+}
+
+.status-sec::before {
+    content: attr(data-status);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3); /* 투명한 검정 배경 */
+    color: #fff;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: 1;
+}
+
+/* (선택 사항) 섹션 내용이 레이블과 겹치지 않도록 */
+.status-sec > *:not(.status-sec::before) {
+    position: relative;
+    z-index: 2;
+}
+
+/* 상태 컨테이너 스타일 */
+.status-container {
+    background-color: rgba(255, 255, 255, 0.8); /* 반투명 흰색 배경 */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+/* 상태 섹션 오버레이 레이블 (원하는 경우 추가) */
+.status-sec {
+    position: relative;
+    padding-top: 50px; /* 오버레이 레이블 공간 확보 */
+}
+.status-sec::before {
+    content: attr(data-status);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    z-index: 1;
+}
+
+/* 왼쪽 사이드바 스타일 */
+#sidebar {
+    padding: 15px;
+}
+#sidebar #category-menu {
+    width: 100%;
+}
+
+/* 다크모드 스타일 */
+.dark-mode .status-sec {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+.dark-mode #todo-new {
+    background-color: rgba(0, 0, 0, 0.30);
+    color: #e0e0e0;
+}
+.dark-mode #category-menu {
+    background-color: rgba(21, 21, 21, 0.30);
+    color: #e0e0e0;
+}
+.dark-mode .modal-header,
+.dark-mode .modal-body {
+    background-color: rgb(55, 55, 55);
+    color: #e0e0e0;
 }

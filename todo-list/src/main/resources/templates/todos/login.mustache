@@ -1,0 +1,95 @@
+{{>layouts/header}}
+
+<style>
+    /* 배경 영상 스타일 */
+    body {
+        background: none;
+        overflow: hidden; /* 배경 영상 때문에 불필요한 스크롤 방지 */
+    }
+    .video-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        min-width: 100vw;
+        min-height: 100vh;
+        z-index: -1;
+        object-fit: cover;
+    }
+    /* 로그인 컨테이너 스타일 */
+    .login-container {
+        box-sizing: border-box;
+        width: 90%;
+        min-height: 50vh;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.85); /* 반투명 배경 */
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        color: black !important;
+    }
+</style>
+
+<!-- 배경 영상 -->
+<video class="video-bg" autoplay loop muted>
+    <source src="/videos/login.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="login-container">
+        <h2 class="mb-4 text-center">로그인</h2>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">사용자 이름</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="사용자 이름을 입력하세요" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button id="login-Button" type="button" class="btn btn-primary w-100">로그인</button>
+        </form>
+        <div class="text-center mt-3">
+            <p>계정이 없으신가요?</p>
+            <a href="/todos/signup" class="btn btn-outline-primary w-100">회원가입</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    {
+        const loginBtn = document.querySelector("#login-Button");
+        loginBtn.addEventListener("click", function(){
+            const user = {
+                username : document.querySelector("#username").value,
+                password : document.querySelector("#password").value
+            }
+
+            const url = `/api/todos/login`;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type" : "application/json"
+                },
+                body: JSON.stringify(user)
+            }).then(response => response.text())  // 토큰이 문자열로 반환되므로 response.text() 사용
+                    .then(token => {
+                        if(token && token.trim() !== "") {
+                            // 토큰 저장 (예: localStorage 사용)
+                            localStorage.setItem("jwtToken", token);
+                            console.log("저장된 토큰:", token);
+                            alert("로그인에 성공했습니다.");
+                            window.location.href = "/todos/index";  // 로그인 후 할일 페이지로 이동
+                        } else {
+                            alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+                        }
+                    }).catch(error => {
+                console.error("로그인 실패", error);
+                alert("로그인 과정에서 오류가 발생했습니다.");
+            });
+        });
+
+    }
+</script>
+
+{{>layouts/footer}}
