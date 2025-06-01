@@ -164,8 +164,45 @@
             });
         });
 
-    });
+        // 즐겨찾기 버튼 클릭 이벤트 (별 토글)
+        const favButtons = document.querySelectorAll(".btn-favorite");
+        favButtons.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                // 카드 전체 클릭 이벤트와 겹치지 않도록 전파 차단
+                e.stopPropagation();
 
+                const taskId = this.getAttribute("data-id");
+                // API 엔드포인트 (PATCH로 favorite 상태 업데이트)
+                const url = `/api/todos/updateFavorite/${taskId}`;
+
+                // 현재 아이콘 상태 검사
+                // const starEl = this.querySelector(".star-icon");
+                // const willFavorite = starEl.textContent === "☆";
+
+                const icon = this.querySelector("i.fa-star");
+                const willFavorite = icon.classList.contains("fa-regular");
+
+                fetch(url, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ favorite: willFavorite })
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    // 성공 시 UI 업데이트
+                    // starEl.textContent = willFavorite ? "★" : "☆";
+
+                    // 성공 시 클래스만 토글 → 크기·디자인 유지
+                    icon.classList.toggle("fa-regular",  !willFavorite);
+                    icon.classList.toggle("fa-solid",    willFavorite);
+                }).catch(error => {
+                    console.error("즐겨찾기 변경 실패:", error);
+                    alert("즐겨찾기 상태 변경에 실패했습니다.");
+                });
+            });
+        });
+    });
 }
 
 
@@ -173,10 +210,22 @@
 {
     const cateAddBtn = document.querySelector("#category-add-btn");
     cateAddBtn.addEventListener("click", function() {
+
+        const check = document.querySelector("#add-category-name").value.trim();
+
+        if (!check || check.length === 0){
+            alert("카테고리 이름을 빈 문자로 지정할 수 없습니다.");
+            return;
+        }
+        if (check.length > 13){
+            alert("카테고리 이름은 12자를 초과할 수 없습니다.");
+            return;
+        }
+
         const category = {
             name : document.querySelector("#add-category-name").value
         }
-        const url = "/api/todos/index/categoryAdd"
+        const url = "/api/todos/index/category"
 
         fetch(url, {
             method: "POST",
@@ -219,6 +268,10 @@
             alert(`"전체"라는 이름으로 카테고리를 설정할 수 없습니다.`);
             return;
         }
+        if(newName.length > 13){
+            alert("카테고리 이름은 12자를 초과할 수 없습니다.");
+            return;
+        }
         for(let i=0; i < allRadio.length; i++) if(allRadio[i].id === `categoryradio-${newName}`){
                 alert(`${newName} (이)라는 카테고리는 이미 존재합니다.`);
                 return;
@@ -229,7 +282,7 @@
             name : newName
         }
 
-        const url = "/api/todos/index/categoryEdit/" + category.id;
+        const url = "/api/todos/index/category/" + category.id;
 
         fetch(url, {
             method: "PATCH",
@@ -263,7 +316,7 @@
 
         // 전체 라디오버튼이 눌린 상태에서는 모두 삭제
         if(cateId === 0){
-            const url = `/api/todos/index/categoryDelete/all`
+            const url = `/api/todos/index/category`
 
             fetch(url, {
                 method: "DELETE"
@@ -276,7 +329,7 @@
         }
         // 아니면 해당 카테고리만 삭제
         else{
-            const url = `/api/todos/index/categoryDelete/${cateId}`;
+            const url = `/api/todos/index/category/${cateId}`;
 
             fetch(url, {
                 method: "DELETE"
@@ -301,6 +354,16 @@
            return;
        }
 
+       const check = document.querySelector("#new-task").value.trim();
+       if (!check || check.length === 0){
+           alert("작업 이름을 비울 수 없습니다.");
+           return;
+       }
+       if (check.length > 13){
+           alert("작업 이름은 12글자를 초과할 수 없습니다");
+           return;
+       }
+
        const deadlineInput = document.querySelector("#deadline-date");
 
        if(!deadlineInput.value || deadlineInput.value === '') deadlineInput.value = null;
@@ -313,7 +376,7 @@
        }
        console.log(task);
 
-       const url = `/api/todos/index/addTask`;
+       const url = `/api/todos/index/task`;
 
        fetch(url, {
            method: "POST",
@@ -330,27 +393,6 @@
     });
 }
 
-
-// 단일 작업 수정 모달 띄우기
-// {
-//     const taskEditModal = document.querySelector("#task-edit-modal");
-//     taskEditModal.addEventListener("show.bs.modal", function(event){
-//         const triggerBtn = event.relatedTarget;
-//
-//         const id = triggerBtn.getAttribute("data-bs-id"); // 속성 위에가서 추가해주기
-//         const title = triggerBtn.getAttribute("data-bs-title");
-//         const status = triggerBtn.getAttribute("data-bs-status");
-//         const category_name = triggerBtn.getAttribute("data-bs-category-name");
-//         const deadline = triggerBtn.getAttribute("data-bs-deadline");
-//
-//         document.querySelector("#edit-task-id").value = id;
-//         document.querySelector("#edit-task-title").value = title;
-//         document.querySelector("#edit-task-status").value = status;
-//         document.querySelector("#edit-task-category-name").value = category_name;
-//         document.querySelector("#edit-deadline").value = deadline;
-//
-//     });
-// }
 
 // 개별 작업 카드 클릭 시 관리 모달 띄우기
 const taskItems = document.querySelectorAll(".task-item");
@@ -389,6 +431,17 @@ taskItems.forEach(item => {
 {
     const taskEditBtn = document.querySelector("#task-edit-btn");
     taskEditBtn.addEventListener("click", function(){
+        const checkTask = document.querySelector("#edit-task-title").value.trim();
+
+        if(!checkTask || checkTask.length === 0){
+            alert("작업 이름을 비울 수 없습니다.");
+            return;
+        }
+        if(checkTask.length > 13){
+            alert("작업 이름은 13글자를 초과할 수 없습니다.");
+            return;
+        }
+
         const task = {
             id : document.querySelector("#edit-task-id").value,
             title : document.querySelector("#edit-task-title").value,
@@ -398,7 +451,7 @@ taskItems.forEach(item => {
         }
         console.log(task);
 
-        const url = "/api/todos/index/editTask/" + task.id;
+        const url = "/api/todos/index/task/" + task.id;
 
         fetch(url, {
             method: "PATCH",
@@ -427,7 +480,7 @@ taskItems.forEach(item => {
             return;
         }
 
-        const url = `/api/todos/index/deleteTask/${taskId}`;
+        const url = `/api/todos/index/task/${taskId}`;
         fetch(url, {
             method: "DELETE"
         }).then(response => {

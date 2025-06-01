@@ -13,12 +13,15 @@ import java.util.List;
 @Getter
 public class CategoryDto {
     private Long id;
+    private Long webUserId;
     private String name;
+
 //    private List<TodoDto> todos;
 
     public static CategoryDto createCategoryDto(Category category) {
         return new CategoryDto(
                 category.getId(),
+                category.getWebUser().getId(),
                 category.getName()
         );
     }
@@ -30,8 +33,5 @@ public class CategoryDto {
         }
         return dtos;
     }
-
-    public Category toEntity() {
-        return new Category(id, this.name, null);
-    }
+    // null로 주는거 처리
 }

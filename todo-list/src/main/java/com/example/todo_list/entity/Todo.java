@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 
@@ -21,17 +20,31 @@ public class Todo {
     private Long id;
     // 기존의 문자열 형태의 카테고리 대신, Category 엔티티와 연관관계 설정.
     @ManyToOne
+    @JoinColumn(name = "webUser_id") // 해당 작업은 유저 하나에 속하기 때문
+    private WebUser webUser;
+
+    @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-//    @ManyToOne
-//    @JoinColumn(name = "user_id") // 해당 작업은 유저 하나에 속하기 때문
-//    private User user;
+
     @Column
     private String title; //작업 제목
     @Column
     private String status; //작업 상태(준비, 완료 두 가지 구성만 사용할것)
     @Column
     private LocalDate deadline;
+    @Column
+    private Boolean favorite;
+
+    @Builder
+    public Todo(WebUser webUser, Category category, String title, String status, LocalDate deadline, boolean favorite) {
+        this.webUser = webUser;
+        this.category = category;
+        this.title = title;
+        this.status = status;
+        this.deadline = deadline;
+        this.favorite = favorite;
+    }
 
     // DTO에서 카테고리 이름을 문자열로 반환받기 위함
     public String getCategoryName() {
@@ -55,7 +68,7 @@ public class Todo {
         if(dto.getCategory_name() != null){
             this.category = editCate;
         }
-        if(dto.getDeadline_str() != null){
+        if(dto.getDeadline_str() != null && !dto.getDeadline_str().equals("")){
             DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
             this.deadline = LocalDate.parse(dto.getDeadline_str(), formatter);
         }
